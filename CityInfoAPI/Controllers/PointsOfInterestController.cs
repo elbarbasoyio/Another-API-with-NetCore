@@ -47,15 +47,27 @@ namespace CityInfoAPI.Controllers
 
         [HttpPost]
         [ProducesResponseType(404)]
+        [ProducesResponseType(400)]
         [ProducesResponseType(201)]
         public IActionResult CreatePointOfInterest(int cityId, 
             [FromBody] PointOfInterestForCreationDto pointsOfInterestForCreation)
         {
+            if(pointsOfInterestForCreation.Description == pointsOfInterestForCreation.Name)
+            {
+                ModelState.AddModelError(
+                    "Description",
+                    "The provided description should be different from the name.");
+            }
+            if(!ModelState.IsValid)
+            {
+                return BadRequest();
+            }
+
             var city = CitiesDataStore.Current.Cities
                 .FirstOrDefault(c => c.Id == cityId);
             if(city == null)
             {
-                return NotFound();
+                return NotFound(ModelState);
             }
 
             //demo purposes
